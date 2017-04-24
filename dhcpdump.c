@@ -271,7 +271,7 @@ void printHexString(u_char *data, int len) {
 			if (i * 8 + j >= len) break;
 			printf("%c", isprint(c) ? c : '.');
 		}
-		if (i * 8 + j < len) printf("\n\t\t\t\t\t    ");
+		if (i * 8 + j < len) printf("|");
 	}
 }
 
@@ -284,7 +284,7 @@ void printHex(u_char *data, int len) {
 			if (i * 8 + j >= len) break;
 			printf("%02x", data[i * 8 + j]);
 		}
-		if (i * 8 + j < len) printf("\n\t\t\t\t\t    ");
+		if (i * 8 + j < len) printf("|");
 	}
 }
 
@@ -303,8 +303,9 @@ void printReqParmList(u_char *data, int len) {
 	int i;
 
 	for (i = 0; i < len; i++) {
-		printf("%3d (%s)\n", data[i], dhcp_options[data[i]]);
-		printf("\t\t\t\t\t    ");
+		printf("%d (%s)", data[i], dhcp_options[data[i]]);
+		if (i < len-1) printf(",");
+		//printf("|");
 	}
 }
 
@@ -316,30 +317,30 @@ int printdata(u_char *data, int data_len) {
 	if (data_len == 0)
 		return 0;
 
-	printf(  "  TIME: %s\n", timestamp);
-	printf(  "    IP: %s (%s) > %s (%s)\n",
+	printf("TIME: %s", timestamp);
+	printf("|IP: %s (%s) > %s (%s)",
 	    ip_origin, mac_origin, ip_destination, mac_destination);
-	printf(  "    OP: %d (%s)\n", data[0], operands[data[0]]);
-	printf(  " HTYPE: %d (%s)\n", data[1], htypes[data[1]]);
-	printf(  "  HLEN: %d\n", data[2]);
-	printf(  "  HOPS: %d\n", data[3]);
-	printf(  "   XID: %02x%02x%02x%02x\n",
+	printf("|OP: %d (%s)", data[0], operands[data[0]]);
+	printf("|HTYPE: %d (%s)", data[1], htypes[data[1]]);
+	printf("|HLEN: %d", data[2]);
+	printf("|HOPS: %d", data[3]);
+	printf("|XID: %02x%02x%02x%02x",
 	    data[4], data[5], data[6], data[7]);
-	printf(  "  SECS: "); print16bits(data + 8);
-	printf("\n FLAGS: %x\n", 255 * data[10] + data[11]);
+	printf("|SECS: "); print16bits(data + 8);
+	printf("|FLAGS: %x", 255 * data[10] + data[11]);
 
-	printf(  "CIADDR: "); printIPaddress(data + 12);
-	printf("\nYIADDR: "); printIPaddress(data + 16);
-	printf("\nSIADDR: "); printIPaddress(data + 20);
-	printf("\nGIADDR: "); printIPaddress(data + 24);
-	printf("\nCHADDR: "); printHexColon(data+28, 16);
-	printf("\n SNAME: %s.\n", data + 44);
-	printf(  " FNAME: %s.\n", data + 108);
+	printf("|CIADDR: "); printIPaddress(data + 12);
+	printf("|YIADDR: "); printIPaddress(data + 16);
+	printf("|SIADDR: "); printIPaddress(data + 20);
+	printf("|GIADDR: "); printIPaddress(data + 24);
+	printf("|CHADDR: "); printHexColon(data+28, 16);
+	printf("|SNAME: %s.", data + 44);
+	printf("|FNAME: %s.", data + 108);
 
 	j = 236;
 	j += 4;	/* cookie */
 	while (j < data_len && data[j] != 255) {
-		printf("OPTION: %3d (%3d) %-26s", data[j], data[j + 1],
+		printf("|OPTION: %3d (%3d) %-26s", data[j], data[j + 1],
 		    dhcp_options[data[j]]);
 
 	switch (data[j]) {
@@ -526,10 +527,10 @@ int printdata(u_char *data, int data_len) {
 		break;
 
 	case 82:	// Relay Agent Information
-		printf("\n");
+		printf("|");
 		for (i = j + 2; i < j + data[j + 1]; ) {
 			if (i != j+2) {
-				printf("\n");
+				printf("|");
 			}
 			printf("%-17s %-13s ", " ",
 			    data[i] > sizeof(relayagent_suboptions) ?
@@ -545,7 +546,7 @@ int printdata(u_char *data, int data_len) {
 		break;
 
 	}
-	printf("\n");
+	//printf("\n");
 
 	/*
 	// This might go wrong if a mallformed packet is received.
@@ -561,7 +562,8 @@ int printdata(u_char *data, int data_len) {
 
 	}
 
-	puts("---------------------------------------------------------------------------\n");
+	//puts("\n");
+	printf("\n");
 	fflush(stdout);
 
 	return 0;
