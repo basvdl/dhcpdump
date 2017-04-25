@@ -123,7 +123,7 @@ void pcap_callback(u_char *user, const struct pcap_pkthdr *h, const u_char *sp) 
 	int offset = 0;
 
 	if (h->caplen < ETHER_HDR_LEN) {
-		printf("Ignored too short ethernet packet: %d bytes\n",
+		fprintf(stderr,"Ignored too short ethernet packet: %d bytes\n",
 		    h->caplen);
 		return;
 	}
@@ -133,13 +133,13 @@ void pcap_callback(u_char *user, const struct pcap_pkthdr *h, const u_char *sp) 
 
 	// Check for IPv4 packets
 	if (eh->ether_type != 8) { 
-		printf("Ignored non IPv4 packet: %d\n", eh->ether_type);
+		fprintf(stderr,"Ignored non IPv4 packet: %d\n", eh->ether_type);
 		return;
 	}
 
 	// Check for length
 	if (h->caplen < offset + sizeof(struct ip)) {
-		printf("Ignored too short IPv4 packet: %d bytes\n", h->caplen);
+		fprintf(stderr,"Ignored too short IPv4 packet: %d bytes\n", h->caplen);
 		return;
 	}
 
